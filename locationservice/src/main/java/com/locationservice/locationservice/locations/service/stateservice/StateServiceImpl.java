@@ -2,6 +2,7 @@ package com.locationservice.locationservice.locations.service.stateservice;
 
 import com.locationservice.locationservice.locations.dto.request.StateRequestDto;
 import com.locationservice.locationservice.locations.dto.response.StateNameResponseDto;
+import com.locationservice.locationservice.locations.dto.response.StateResponseDto;
 import com.locationservice.locationservice.locations.mapper.StateMapper;
 import com.locationservice.locationservice.locations.model.Country;
 import com.locationservice.locationservice.locations.model.States;
@@ -13,10 +14,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -79,4 +77,14 @@ public class StateServiceImpl implements StateService{
             }
             return responseDtos;
         }
+
+    @Override
+    public StateResponseDto getstateByCountryIdAndStateName(UUID countryId,String stateName) {
+        Optional<States>statesOptional=stateRepository.findByCountryIdAndStateName(countryId,stateName);
+        if(statesOptional.isEmpty()){
+            throw new RuntimeException("INVALID COUNTRY ID AND STATE NAME "+countryId+" "+stateName);
+        }
+        return StateMapper.fromStateToStateResponseDto(statesOptional.get());
+    }
+
 }

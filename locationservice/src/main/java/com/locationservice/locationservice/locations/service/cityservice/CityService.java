@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface CityService {
     CityNameResponseDto createCity(CityRequestDto dto);
-    List<CityResponseDto> getAllCitiesByCountryId(UUID countryId);
     List<CityNameResponseDto>getAll();
     List<CityResponseDto>findByStateName(String stateName);
+    CityResponseDto getByCityName(String cityName);
 }

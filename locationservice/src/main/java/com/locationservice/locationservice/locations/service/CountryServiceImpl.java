@@ -123,4 +123,14 @@ public class CountryServiceImpl implements CountryService {
         }
         return responseDtos;
     }
+
+    @Override
+    public CountryResponseDto getByCountryName(String name) {
+
+        Optional<Country>countryOptional=countryRepository.findByCountryName(name);
+        if(countryOptional.isEmpty()){
+            throw new RuntimeException("country with name not exists "+name);
+        }
+        return mapper.map(countryOptional.get(),CountryResponseDto.class);
+    }
 }

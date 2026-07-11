@@ -12,10 +12,11 @@ import java.util.Optional;
 import java.util.UUID;
 @Repository
 public interface CityRepository extends JpaRepository<City, UUID> {
+
+    @Query("SELECT c FROM City c WHERE c.states.stateName = :stateName")
+    List<City> findAllCitiesByState(@Param("stateName") String stateName);
     Optional<City>findByCityName(String cityName);
     List<City> findByCityNameIn(List<String> cityNames);
     List<City> findByStatesId(UUID stateId);
     Optional<City> findByStatesIdAndCityName(UUID stateId, String cityName);
-    @Query("SELECT c FROM City c WHERE c.states.stateName = :stateName")
-    List<City> findAllCitiesByState(@Param("stateName") String stateName);
 }

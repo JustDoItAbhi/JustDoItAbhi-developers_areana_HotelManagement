@@ -7,6 +7,7 @@ import com.locationservice.locationservice.locations.dto.response.CityNameRespon
 import com.locationservice.locationservice.locations.dto.response.CityResponseDto;
 import com.locationservice.locationservice.locations.mapper.CityMapper;
 import com.locationservice.locationservice.locations.model.City;
+import com.locationservice.locationservice.locations.model.Country;
 import com.locationservice.locationservice.locations.model.States;
 import com.locationservice.locationservice.locations.repository.CityRepository;
 import com.locationservice.locationservice.locations.repository.CountryRepository;
@@ -69,7 +70,12 @@ public class CityServiceImpl implements CityService{
 
 
             city = cityRepository.save(city);
+            List<CityResponseDto>responseDtoList=new ArrayList<>();
+            for(City cities:List.of(city)){
+                responseDtoList.add(CityMapper.fromCityByState(cities));
+            }
 
+            stateMap.put(dto.getStateName(),responseDtoList);
             cityMap.put(cityKey, city.getId());
             cityNameResponseDto=mapper.map(city, CityNameResponseDto.class);
 
@@ -77,10 +83,7 @@ public class CityServiceImpl implements CityService{
         return cityNameResponseDto;
     }
 
-    @Override
-    public List<CityResponseDto> getAllCitiesByCountryId(UUID countryId) {
-        return List.of();
-    }
+
 
     @Override
     public List<CityNameResponseDto> getAll() {
@@ -100,6 +103,7 @@ public class CityServiceImpl implements CityService{
             return stateMap.get(stateName.toUpperCase());
         }
         Optional<States>statesOptional=stateRepository.findByStateName(stateName.toUpperCase());
+        System.out.println("DB CALL");
         if(statesOptional.isEmpty()){
             throw new RuntimeException("invalid state entered "+stateName);
         }
@@ -113,6 +117,15 @@ public class CityServiceImpl implements CityService{
         }
         stateMap.put(stateName,cityResponseDtoList);
         return cityResponseDtoList;
+    }
+
+    @Override
+    public CityResponseDto getByCityName(String cityName) {
+        Optional<City>cityOptional=cityRepository.findByCityName(cityName);
+        if(cityOptional.isEmpty()){
+            throw new RuntimeException("CITY NAME IS INVALID "+cityName);
+        }
+        return CityMapper.fromCityByState(cityOptional.get());
     }
 
 }

@@ -17,7 +17,8 @@
 	<description>Hotel Management Multi-module Microservices</description>
 
     <modules>
-        <module>hotel-service</module>
+        
+        <module>common-library</module><module>hotel-service</module>
         <module>booking-service</module>
         <module>inventory-service</module>
         <module>locationservice</module>
@@ -31,7 +32,7 @@
         <spring.cloud.version>2025.0.0</spring.cloud.version>
         <modelmapper.version>3.2.6</modelmapper.version>
         <spring.boot.version>3.5.3</spring.boot.version>
-        <spring.aop.version>7.0.8</spring.aop.version>
+<!--        <spring.aop.version>7.0.8</spring.aop.version>-->
 
 	</properties>
 	<dependencies>
@@ -49,20 +50,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-aop</artifactId>
-                <version>${spring.aop.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.modelmapper</groupId>
                 <artifactId>modelmapper</artifactId>
@@ -87,7 +74,7 @@
                     <version>3.14.0</version>
                     <configuration>
                         <source>${java.version}</source>
-                        <source>${java.version}</source>
+                        <target>${java.version}</target>
                     </configuration>
                 </plugin>
                 <plugin>

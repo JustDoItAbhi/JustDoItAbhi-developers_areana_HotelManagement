@@ -13,5 +13,6 @@ public interface CountryService {
     CountryResponseDto updateCountryName(String countryName);
     List<CountryResponseDto>getAllCountriesAndStatesAndCities(String countryName);
     List<CountryOnlyNameResponseDto>getAllCountryNames();
+    CountryResponseDto getByCountryName(String name);
 
 }
