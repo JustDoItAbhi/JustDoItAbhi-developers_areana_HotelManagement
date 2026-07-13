@@ -4,6 +4,7 @@ import com.user_service.customer.dto.request.Login;
 import com.user_service.customer.dto.request.UserRequestDto;
 import com.user_service.customer.dto.response.AuthResponse;
 import com.user_service.customer.dto.response.UserResponseDto;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,4 +15,5 @@ public interface UserService {
     boolean deleteUser(UUID id);
     UserResponseDto updateUser(UUID id, UserRequestDto dto);
     UserResponseDto getUserByEmail(String email);
+    Page<UserResponseDto> getAllUsers(int pageNumber, int pageSize);
 }

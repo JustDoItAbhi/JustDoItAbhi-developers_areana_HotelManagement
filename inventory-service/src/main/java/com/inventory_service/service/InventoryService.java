@@ -40,7 +40,7 @@ public class InventoryService {
             InventoryReservedEvent reservedEvent = InventoryReservedEvent.builder()
                     .bookingId(event.getBookingId())
                     .roomId(event.getRoomId())
-                    .userId(event.getUserId())
+                    .userEmail(event.getUserEmail())
                     .quantity(1)
                     .amount(event.getTotalAmount())
                     .build();

@@ -16,12 +16,12 @@ public class BookingEventListener {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupName;
 
-    @KafkaListener(topics = KafkaTopics.BOOKING_CREATED, groupId = "booking-group")
-    public void handleRoomReserved(BookingCreatedEvent event) {
-        // 1. Create booking record (status: PENDING)
-        // 2. Call Payment Service via Feign to get payment link
-        // 3. If successful, publish event
-        Booking paymentEvent = new BookingInitiatedEvent(event.getReservationId());
-        bookingKafkaTemplate.send("payment-initiate", paymentEvent);
-    }
+//    @KafkaListener(topics = KafkaTopics.BOOKING_CREATED, groupId = "booking-group")
+//    public void handleRoomReserved(BookingCreatedEvent event) {
+//        // 1. Create booking record (status: PENDING)
+//        // 2. Call Payment Service via Feign to get payment link
+//        // 3. If successful, publish event
+//        Booking paymentEvent = new BookingInitiatedEvent(event.getReservationId());
+//        bookingKafkaTemplate.send("payment-initiate", paymentEvent);
+//    }
 }

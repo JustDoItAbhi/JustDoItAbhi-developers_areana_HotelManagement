@@ -1,6 +1,7 @@
 package com.user_service.customer.service;
 
 import com.commonlibrary.common_library.common.event.UserRegisteredEvent;
+import com.commonlibrary.common_library.common.mail.JavaMailCreator;
 import com.user_service.customer.dto.request.Login;
 import com.user_service.customer.dto.request.UserRequestDto;
 import com.user_service.customer.dto.response.AuthResponse;
@@ -12,10 +13,14 @@ import com.user_service.customer.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private JwtService jwtService;
     @Autowired
     private KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate;
+    @Autowired
+    private JavaMailCreator javaMailCreator;
 
     @Override
     public UserResponseDto createUser(UserRequestDto dto) {
@@ -48,7 +55,13 @@ public class UserServiceImpl implements UserService {
         user.setCountry(dto.getCountry());
         user.setState(dto.getState());
         user.setCity(dto.getCity());
-        user.setRole(UserRole.USER);
+
+        try {
+            UserRole role = UserRole.valueOf(dto.getRole().toUpperCase());
+            user.setRole(role);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("INVALID ROLE: " + dto.getRole());
+        }
 
         User savedUser = userRepository.save(user);
 
@@ -59,6 +72,9 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         kafkaTemplate.send("user-registered", savedUser.getId().toString(), event);
+        String messge ="PLEASE LOGIN "+" http://localhost:8080/api/user/login";
+        javaMailCreator.send(user.getEmail(),"SIGN UP SUCCESSFULL ",messge);
+        System.out.println("EMAIL SENT BY USER SERVICE ");
         log.info("User registered: {}", savedUser.getEmail());
 
         return mapper.map(savedUser, UserResponseDto.class);
@@ -80,7 +96,9 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
-
+        String messge ="welcome back "+user.getName();
+        javaMailCreator.send(user.getEmail(),"LOGIN SUCCESSFULL ",messge);
+        System.out.println("EMAIL SENT BY USER SERVICE ");
         return response;
     }
 
@@ -120,4 +138,14 @@ public class UserServiceImpl implements UserService {
         }
         return mapper.map(userOptional.get(), UserResponseDto.class);
     }
+
+    @Override
+    public Page<UserResponseDto> getAllUsers(int pageNumber, int pageSize) {
+        Pageable pageable= PageRequest.of(pageNumber,pageSize);
+        Page<User>userPage=userRepository.findAll(pageable);
+
+        return userPage.map(user->
+                mapper.map(user,UserResponseDto.class));
+    }
+
 }

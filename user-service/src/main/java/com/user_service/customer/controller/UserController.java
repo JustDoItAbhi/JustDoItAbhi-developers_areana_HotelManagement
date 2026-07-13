@@ -1,5 +1,6 @@
 package com.user_service.customer.controller;
 
+import com.commonlibrary.common_library.common.annotation.Tracking;
 import com.commonlibrary.common_library.common.ratelimit.RateLimit;
 import com.user_service.customer.dto.request.Login;
 import com.user_service.customer.dto.request.UserRequestDto;
@@ -7,6 +8,7 @@ import com.user_service.customer.dto.response.AuthResponse;
 import com.user_service.customer.dto.response.UserResponseDto;
 import com.user_service.customer.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,9 +21,8 @@ public class UserController {
     @Autowired
     private UserService userService;
     @PostMapping("/register")
-//    @RateLimit(value = 50,duration = 60000)
+    @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<UserResponseDto>create(@RequestBody UserRequestDto dto){
-        System.out.println("REGISTER CONTROLLER CALLED");
         return ResponseEntity.ok(userService.createUser(dto));
     }
     @PostMapping("/login")
@@ -44,5 +45,11 @@ public class UserController {
     public ResponseEntity<UserResponseDto>getUser(@PathVariable ("email")String email){
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
-
+    @GetMapping("/getallusers")
+    @RateLimit(value = 20,duration = 60000)
+    @Tracking
+    public ResponseEntity<Page<UserResponseDto>> allUsers(@RequestParam  (defaultValue = "0")int pageNumber,
+                                                          @RequestParam (defaultValue = "5")int pageSize){
+        return ResponseEntity.ok(userService.getAllUsers(pageNumber,pageSize));
+    }
 }

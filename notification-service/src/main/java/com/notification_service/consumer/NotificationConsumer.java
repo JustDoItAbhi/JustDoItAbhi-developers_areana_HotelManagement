@@ -1,12 +1,12 @@
 
 package com.notification_service.consumer;
 
+import com.commonlibrary.common_library.common.enums.KafkaTopics;
 import com.commonlibrary.common_library.common.event.BookingCreatedEvent;
 import com.commonlibrary.common_library.common.event.NotificationEvent;
 import com.commonlibrary.common_library.common.event.PaymentCompletedEvent;
 import com.commonlibrary.common_library.common.event.UserRegisteredEvent;
 
-import com.commonlibrary.common_library.common.kafka.KafkaTopics;
 import com.notification_service.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

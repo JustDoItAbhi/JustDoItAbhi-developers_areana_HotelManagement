@@ -1,15 +1,14 @@
 package com.api_gateway.apigateway.jwt;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-
+import java.util.List;
 
 @Component
 public class JwtUtil {
@@ -17,29 +16,44 @@ public class JwtUtil {
     private String jwtSecretKey;
     @Value("${spring.jwt.expiry}")
     private long jwtExpiry;
-    private SecretKey getSecretKey() {
-        byte[] keyByte = this.jwtSecretKey.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyByte);
-    }
 
     public boolean validateToken(final String token) {
-        System.out.println("TOCKEN  "+token);
         try {
-          Jwts.parser()
-                  .setSigningKey(getSecretKey())
-                  .build()
-                  .parseClaimsJws(token);
-          return true;
-      }catch (Exception e){
-          System.out.println("TOKEN INVALID "+token);
-          throw new RuntimeException("INVALID TOKEN ");
-      }
+            Jwts.parser()
+                    .setSigningKey(getSignKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("INVALID TOKEN");
+        }
     }
 
+    public Claims extractAllClaims(final String token) {
+        return Jwts.parser()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
 
+    public List<String> extractRoles(final String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("roles", List.class);
+    }
+
+    public String extractUserId(final String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("userId", String.class);
+    }
+
+    public String extractEmail(final String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("email", String.class);
+    }
 
     private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecretKey);
+        byte[] keyBytes = jwtSecretKey.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

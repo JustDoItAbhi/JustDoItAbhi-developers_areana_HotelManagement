@@ -16,7 +16,7 @@ import java.util.UUID;
 public class InventoryReservedEvent {
     private UUID bookingId;
     private UUID roomId;
-    private UUID userId;
+    private String userEmail;
     private int quantity;
     private double amount;
     @Builder.Default

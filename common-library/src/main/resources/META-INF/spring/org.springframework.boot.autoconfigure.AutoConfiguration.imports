@@ -1,0 +1,4 @@
+com.commonlibrary.common_library.common.security.MailAutoConfiguration
+com.commonlibrary.common_library.common.security.RateLimiterAutoConfiguration
+com.commonlibrary.common_library.common.ratelimit.RateLimitInterceptor
+com.commonlibrary.common_library.common.ratelimit.RateLimiterAspect

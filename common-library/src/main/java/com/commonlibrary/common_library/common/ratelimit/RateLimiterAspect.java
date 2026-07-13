@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
-@Component
 public class RateLimiterAspect {
     private final Map<String, Deque<Long>> requestMap = new ConcurrentHashMap<>();
 

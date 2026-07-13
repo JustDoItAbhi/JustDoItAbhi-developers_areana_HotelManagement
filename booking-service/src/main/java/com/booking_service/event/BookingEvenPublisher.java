@@ -1,8 +1,9 @@
 package com.booking_service.event;
 
+import com.commonlibrary.common_library.common.enums.KafkaTopics;
 import com.commonlibrary.common_library.common.enums.RoomType;
 import com.commonlibrary.common_library.common.event.BookingCreatedEvent;
-import com.commonlibrary.common_library.common.kafka.KafkaTopics;
+
 import com.commonlibrary.common_library.common.model.OutboxEvent;
 import com.commonlibrary.common_library.common.outbox.repo.OutboxRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;

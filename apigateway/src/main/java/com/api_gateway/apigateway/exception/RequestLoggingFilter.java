@@ -38,6 +38,6 @@ public class RequestLoggingFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1000; // Run BEFORE JwtAuthenticationFilter
+        return -1000;
     }
 }

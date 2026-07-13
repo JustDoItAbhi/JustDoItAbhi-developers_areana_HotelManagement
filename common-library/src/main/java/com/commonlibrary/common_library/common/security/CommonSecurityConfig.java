@@ -1,10 +1,13 @@
 package com.commonlibrary.common_library.common.security;
 
+import com.commonlibrary.common_library.common.mail.JavaMailCreator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -15,34 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 @Configuration
-
 public class CommonSecurityConfig {
-
-//    private final JwtTokenFilter jwtTokenFilter;
-//
-//    public CommonSecurityConfig(JwtTokenFilter jwtTokenFilter) {
-//        this.jwtTokenFilter = jwtTokenFilter;
-//    }
-
-//    @Bean
-//    @ConditionalOnMissingBean(SecurityFilterChain.class)
-//    public SecurityFilterChain commonSecurityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .cors(Customizer.withDefaults())
-//                .csrf(csrf -> csrf.disable())
-//            .authorizeHttpRequests(auth -> auth
-//                    .requestMatchers(HttpMethod.GET, "/api/hotel/**").permitAll()
-//                .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
-//                .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
-//                .requestMatchers(HttpMethod.POST, "/api/user/admin").permitAll()
-//                .requestMatchers("/actuator/**", "/error").permitAll()
-//                .anyRequest().authenticated()
-//            )
-//            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//            .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
