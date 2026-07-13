@@ -1,5 +1,6 @@
 package com.booking_service.feignclient;
 
+import com.booking_service.dto.RoomReserveDto;
 import com.booking_service.requestdto.FeignSearchHotelRequestDto;
 import com.booking_service.responsedto.FeignSearchResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -29,6 +30,6 @@ public interface HotelFeignClinet {
     public FeignRoomResponseDto selectRoom(@PathVariable("roomId")UUID roomId);
 
     @PutMapping("/reserveRoom/{roomId}")
-    public String resereveRoom(@PathVariable("roomId")UUID roomId);
+    public RoomReserveDto resereveRoom(@PathVariable("roomId")UUID roomId);
 
 }

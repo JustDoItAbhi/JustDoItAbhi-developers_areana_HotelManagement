@@ -18,9 +18,10 @@ import java.util.UUID;
 public class UserController {
     @Autowired
     private UserService userService;
-    @PostMapping
-    @RateLimit(value = 50,duration = 60000)
+    @PostMapping("/register")
+//    @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<UserResponseDto>create(@RequestBody UserRequestDto dto){
+        System.out.println("REGISTER CONTROLLER CALLED");
         return ResponseEntity.ok(userService.createUser(dto));
     }
     @PostMapping("/login")

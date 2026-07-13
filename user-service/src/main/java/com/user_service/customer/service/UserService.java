@@ -14,5 +14,4 @@ public interface UserService {
     boolean deleteUser(UUID id);
     UserResponseDto updateUser(UUID id, UserRequestDto dto);
     UserResponseDto getUserByEmail(String email);
-
 }

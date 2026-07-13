@@ -1,14 +1,17 @@
 package com.booking_service.service;
 
+import com.booking_service.dto.RoomReserveDto;
 import com.booking_service.dto.UserDto;
 import com.booking_service.feignclient.*;
 import com.booking_service.model.Booking;
 import com.booking_service.repo.BookingRepository;
 import com.booking_service.requestdto.FeignSearchHotelRequestDto;
 import com.booking_service.responsedto.FeignSearchResponseDto;
+import com.commonlibrary.common_library.common.enums.KafkaTopics;
 import com.commonlibrary.common_library.common.event.BookingCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +26,7 @@ public class BookingServcieImpl implements BookingService{
     @Autowired private UserClient userClient;
     @Autowired private SendEmailNotification sendEmailNotification;
     @Autowired private BookingRepository bookingRepository;
+    @Autowired private KafkaTemplate<String, Object>kafkaTemplate;
 
 @Autowired private PaymentFeignClinet paymentFeignClinet;
 
@@ -71,11 +75,14 @@ public class BookingServcieImpl implements BookingService{
         event.setBookingId(booking.getId());
         event.setRoomType(dto.getRoomType());
         event.setHotelId(dto.getHotelId());
-        String roomReserved=hotelFeignClinet.resereveRoom(roomId);
-        if(roomReserved==null){
+        RoomReserveDto reserveDto=hotelFeignClinet.resereveRoom(roomId);
+        reserveDto.setBookingId(booking.getId());
+        reserveDto.setUserEmail(booking.getUserEmail());
+        if(reserveDto==null){
             throw new RuntimeException("ROOM CANNOT BE RESERVED PLEASE CONTACT ADMINISTRTOR");
         }
         String paymentLink=paymentFeignClinet.pay(booking.getRoomId(), (long) booking.getTotalAmount());
+        kafkaTemplate.send(KafkaTopics.BOOKING_CREATED,event);
         String message ="ROOM RESERVED PLEASE PAY NOW ";
         sendEmailNotification.sendEmail(event.getUserEmail(),message,paymentLink);
         log.info("EMAIL SENT TO USER FOR PAYENT ");
