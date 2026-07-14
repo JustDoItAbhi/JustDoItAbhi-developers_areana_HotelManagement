@@ -22,6 +22,7 @@ public class BookingCreatedEvent {
     private Instant checkInDate;
     private Instant checkOutDate;
     private double totalAmount;
+    private String paymentLink;
     @Builder.Default
     private Instant createdAt = Instant.now();
 

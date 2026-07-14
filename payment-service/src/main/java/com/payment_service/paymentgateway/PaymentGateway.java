@@ -5,6 +5,5 @@ import com.stripe.exception.StripeException;
 import java.util.UUID;
 
 public interface PaymentGateway {
-
-    String pay(UUID roomId, long amount) throws StripeException;
+    String pay(UUID roomId, long amount, UUID bookingId, String userEmail) throws StripeException;
 }

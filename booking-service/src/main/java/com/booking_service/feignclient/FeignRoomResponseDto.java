@@ -9,7 +9,7 @@ import java.util.UUID;
 public class FeignRoomResponseDto {
     private UUID roomId;
     private RoomType roomType;
-    private BigDecimal price;
+    private double price;
     private int numberOfPeopleAllowed;
     private UUID hotelId;
     private String roomStatus;

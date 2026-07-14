@@ -1,5 +1,7 @@
 package com.booking_service.controller;
 
+import com.booking_service.dto.BookingResponseDto;
+import com.booking_service.dto.request.BookingRequestDto;
 import com.booking_service.feignclient.FeignHotelResponseDto;
 import com.booking_service.feignclient.FeignRoomResponseDto;
 import com.booking_service.requestdto.FeignSearchHotelRequestDto;
@@ -52,5 +54,10 @@ public class BookingController {
     public ResponseEntity<String>reserveRoomByroomId(@PathVariable("userEmail") String userEmail,@PathVariable("roomId") UUID roomId) {
         return ResponseEntity.ok(bookingService.reserveRoom(userEmail,roomId));
     }
-
+    @PostMapping("/book")
+    @Tracking
+    @RateLimit(value = 50,duration = 60000)
+    public ResponseEntity<BookingResponseDto>booking(@RequestBody BookingRequestDto dto) {
+        return ResponseEntity.ok(bookingService.createBooking(dto));
+    }
 }

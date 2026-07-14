@@ -26,8 +26,10 @@ public class RouteValidator {
                     "/api/user/getallusers",
                     "/api/admin/**",
                     "/api/user/**",
-                    "/api/hotel/**/delete",
-                    "/api/booking/**/delete"
+                    "/api/hotel/**",
+                    "/api/booking/**",
+                    "/api/pay/create"
+
             ),
 
             // Hotel Manager endpoints
@@ -36,15 +38,16 @@ public class RouteValidator {
                     "/api/hotel/getallhotels",
                     "/api/hotel/**/update",
                     "/api/hotel/**/delete",
-                    "/api/booking/**"
+                    "/api/booking/**",
+                    "/api/pay/create"
             ),
 
             // User endpoints (accessible by all authenticated users)
             "ROLE_USER", List.of(
-                    "/api/user/**",
+                    "/api/user/{email}",
                     "/api/booking/**",
                     "/api/hotel/getallhotels",
-                    "/api/pay/**",
+                    "/api/pay/create",
                     "/api/inventory/**",
                     "/api/location/**",
                     "/api/notification/**"
