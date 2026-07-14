@@ -1,6 +1,8 @@
 package com.user_service.customer.service;
 
+import com.commonlibrary.common_library.common.enums.KafkaTopics;
 import com.commonlibrary.common_library.common.event.UserRegisteredEvent;
+import com.commonlibrary.common_library.common.kafka.EventProducer;
 import com.commonlibrary.common_library.common.mail.JavaMailCreator;
 import com.user_service.customer.dto.request.Login;
 import com.user_service.customer.dto.request.UserRequestDto;
@@ -36,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate;
+    private EventProducer eventProducer;
     @Autowired
     private JavaMailCreator javaMailCreator;
 
@@ -70,8 +72,7 @@ public class UserServiceImpl implements UserService {
                 .username(savedUser.getName())
                 .email(savedUser.getEmail())
                 .build();
-
-        kafkaTemplate.send("user-registered", savedUser.getId().toString(), event);
+        eventProducer.sendEvent(KafkaTopics.USER_REGISTERED, event);
         String messge ="PLEASE LOGIN "+" http://localhost:8080/api/user/login";
         javaMailCreator.send(user.getEmail(),"SIGN UP SUCCESSFULL ",messge);
         System.out.println("EMAIL SENT BY USER SERVICE ");

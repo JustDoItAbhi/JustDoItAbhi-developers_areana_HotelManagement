@@ -1,16 +1,19 @@
 package com.commonlibrary.common_library.common.kafka;
 
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 
-@Component
-@RequiredArgsConstructor
 @Slf4j
+
 public class EventProducer {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    private  KafkaTemplate<String, Object> kafkaTemplate;
+
+    public EventProducer(KafkaTemplate<String, Object> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     public void sendEvent(String topic, Object event) {
         kafkaTemplate.send(topic, event)

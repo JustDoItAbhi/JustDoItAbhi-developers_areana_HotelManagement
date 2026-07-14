@@ -2,7 +2,6 @@ package com.booking_service.feignclient;
 
 
 import com.booking_service.dto.request.PaymentRequestDto;
-import com.payment_service.controller.PaymentRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

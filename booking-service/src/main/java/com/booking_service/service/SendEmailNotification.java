@@ -12,9 +12,13 @@ import java.util.Arrays;
 @Component
 public class SendEmailNotification {
 
-  @Autowired private JavaMailSender mailSender;
+   private final JavaMailSender mailSender;
 
-  @Value("${spring.mail.username}")
+    public SendEmailNotification(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
+    @Value("${spring.mail.username}")
   private String adminEmail;
 
 

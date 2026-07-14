@@ -1,5 +1,3 @@
-com.commonlibrary.common_library.common.security.MailAutoConfiguration
-com.commonlibrary.common_library.common.security.RateLimiterAutoConfiguration
-com.commonlibrary.common_library.common.ratelimit.RateLimitInterceptor
-com.commonlibrary.common_library.common.ratelimit.RateLimiterAspect
-com.commonlibrary.common_library.common.kafka.EventProducer
+com.commonlibrary.common_library.common.mail.MailAutoConfiguration
+com.commonlibrary.common_library.common.ratelimit.RateLimiterAutoConfiguration
+com.commonlibrary.common_library.common.kafka.KafkaAutoConfiguration
