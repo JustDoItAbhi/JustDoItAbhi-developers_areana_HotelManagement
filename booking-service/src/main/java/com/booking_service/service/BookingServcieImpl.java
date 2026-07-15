@@ -6,6 +6,9 @@ import com.booking_service.dto.UserDto;
 import com.booking_service.dto.request.BookingRequestDto;
 import com.booking_service.dto.request.PaymentRequestDto;
 import com.booking_service.feignclient.*;
+import com.booking_service.feignclient.dto.FeignHotelResponseDto;
+import com.booking_service.feignclient.dto.FeignRoomResponseDto;
+import com.booking_service.feignclient.dto.UserClient;
 import com.booking_service.model.Booking;
 import com.booking_service.repo.BookingRepository;
 import com.booking_service.requestdto.FeignSearchHotelRequestDto;
@@ -55,7 +58,9 @@ public class BookingServcieImpl implements BookingService{
 
     @Override
     public FeignRoomResponseDto selectRoomByID(UUID roomId) {
-        return hotelFeignClinet.selectRoom(roomId);
+        FeignRoomResponseDto dto=hotelFeignClinet.selectRoom(roomId);
+        System.out.println("ROOM COST "+dto.getRoomPrice());
+        return dto;
     }
 
     @Override
@@ -86,55 +91,40 @@ public class BookingServcieImpl implements BookingService{
         RoomReserveDto reserveDto=hotelFeignClinet.resereveRoom(roomId);
         reserveDto.setBookingId(booking.getId());
         reserveDto.setUserEmail(booking.getUserEmail());
-        if(reserveDto==null){
-            throw new RuntimeException("ROOM CANNOT BE RESERVED PLEASE CONTACT ADMINISTRTOR");
-        }
-//        String paymentLink=paymentFeignClinet.pay(booking.getRoomId(), (long) booking.getTotalAmount());
-//        kafkaTemplate.send(KafkaTopics.BOOKING_CREATED,event);
         String message ="ROOM RESERVED PLEASE PAY NOW ";
-//        sendEmailNotification.sendEmail(event.getUserEmail(),message,paymentLink);
         log.info("EMAIL SENT TO USER FOR PAYENT ");
-//        return paymentFeignClinet.pay(event.getRoomId(), (long) event.getTotalAmount());
     return "";
     }
 
     @Override
     public BookingResponseDto createBooking(BookingRequestDto dto) {
-        // Get user details
         UserDto userDto = userClient.getUser(dto.getUserEmail());
         if (userDto == null) {
             throw new RuntimeException("INVALID USER");
         }
-
-        // Check if room is available
         Optional<Booking> bookingOptional = bookingRepository.findByRoomId(dto.getRoomId());
         if (bookingOptional.isPresent()) {
             throw new RuntimeException("This room is already reserved. Please choose another room: " + dto.getRoomId());
         }
-
-        // Get room details from Hotel Service
         FeignRoomResponseDto feignRoomResponseDto = hotelFeignClinet.selectRoom(dto.getRoomId());
 
-        // Create booking
         Booking booking = new Booking();
         booking.setUserEmail(userDto.getEmail());
         booking.setRoomType(feignRoomResponseDto.getRoomType());
         booking.setHotelId(feignRoomResponseDto.getHotelId());
         booking.setRoomId(feignRoomResponseDto.getRoomId());
-        booking.setTotalAmount(feignRoomResponseDto.getPrice());
-//        booking.setCheckInDate(dto.getCheckInDate());
-//        booking.setCheckOutDate(dto.getCheckOutDate());
+        booking.setTotalAmount(feignRoomResponseDto.getRoomPrice());
         booking.setStatus("PENDING");
         bookingRepository.save(booking);
 
-        // Create payment request
         PaymentRequestDto paymentRequestDto = new PaymentRequestDto();
-        paymentRequestDto.setBookingId(booking.getId());
         paymentRequestDto.setRoomId(booking.getRoomId());
-        paymentRequestDto.setAmount((long) (booking.getTotalAmount() * 100)); // Convert to cents
+        paymentRequestDto.setBookingId(booking.getId());
+
+        paymentRequestDto.setAmount((long) (booking.getTotalAmount() * 100));
         paymentRequestDto.setEmail(booking.getUserEmail());
 
-        // Call Payment Service
+        // Called Payment Service
         String paymentUrl = null;
         try {
             paymentUrl = paymentFeignClinet.pay(paymentRequestDto);

@@ -2,8 +2,8 @@ package com.booking_service.controller;
 
 import com.booking_service.dto.BookingResponseDto;
 import com.booking_service.dto.request.BookingRequestDto;
-import com.booking_service.feignclient.FeignHotelResponseDto;
-import com.booking_service.feignclient.FeignRoomResponseDto;
+import com.booking_service.feignclient.dto.FeignHotelResponseDto;
+import com.booking_service.feignclient.dto.FeignRoomResponseDto;
 import com.booking_service.requestdto.FeignSearchHotelRequestDto;
 import com.booking_service.responsedto.FeignSearchResponseDto;
 import com.booking_service.service.BookingService;
@@ -36,7 +36,7 @@ public class BookingController {
     public ResponseEntity<FeignHotelResponseDto>getByHotelId(@PathVariable("hotelId") UUID hotelId) {
         return ResponseEntity.ok(bookingService.getHotelBYid(hotelId));
     }
-    @GetMapping("getRoomsByHotelId/{hotelId}")
+    @GetMapping("/getRoomsByHotelId/{hotelId}")
     @Tracking
     @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<List<FeignRoomResponseDto>>getAllRoomByHotelId(@PathVariable("hotelId") UUID hotelId) {

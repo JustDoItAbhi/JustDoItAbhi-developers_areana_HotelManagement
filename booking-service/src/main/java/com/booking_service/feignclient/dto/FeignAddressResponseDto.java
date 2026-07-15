@@ -1,4 +1,4 @@
-package com.booking_service.feignclient;
+package com.booking_service.feignclient.dto;
 
 import lombok.Data;
 

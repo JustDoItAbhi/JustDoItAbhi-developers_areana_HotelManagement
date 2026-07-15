@@ -37,7 +37,6 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             String path = exchange.getRequest().getURI().getPath();
             System.out.println("Authentication Filter - Path: " + path);
 
-            // Check if endpoint is public
             if (validator.isPublic.test(exchange.getRequest())) {
                 System.out.println("Public endpoint - skipping authentication");
                 return chain.filter(exchange);
@@ -45,7 +44,6 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
             System.out.println("Protected endpoint - validating token and roles");
 
-            // Check for Authorization header
             if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing authorization header");
             }
@@ -84,7 +82,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                         .build();
 
             } catch (ResponseStatusException e) {
-                throw e; // Re-throw ResponseStatusException
+                throw e;
             } catch (Exception e) {
                 System.out.println("Error validating token: " + e.getMessage());
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");

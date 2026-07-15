@@ -2,8 +2,8 @@ package com.booking_service.service;
 
 import com.booking_service.dto.BookingResponseDto;
 import com.booking_service.dto.request.BookingRequestDto;
-import com.booking_service.feignclient.FeignHotelResponseDto;
-import com.booking_service.feignclient.FeignRoomResponseDto;
+import com.booking_service.feignclient.dto.FeignHotelResponseDto;
+import com.booking_service.feignclient.dto.FeignRoomResponseDto;
 import com.booking_service.requestdto.FeignSearchHotelRequestDto;
 import com.booking_service.responsedto.FeignSearchResponseDto;
 

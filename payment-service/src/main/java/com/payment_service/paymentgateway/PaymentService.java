@@ -71,17 +71,15 @@ public class PaymentService implements PaymentGateway {
 
         String paymentUrl = paymentLink.getUrl();
         log.info("Payment link created: {}", paymentUrl);
+//        BookingPaymentEvent event = new BookingPaymentEvent();
+//        event.setBookingId(bookingId);
+//        event.setUserEmail(userEmail);
+//        event.setAmount((double) amount / 100);
+//        event.setStatus("PENDING");
+//        event.setPaymentLink(paymentUrl);
+//        event.setTransactionId(paymentLink.getId());
 
-        // Send payment event to Kafka
-        BookingPaymentEvent event = new BookingPaymentEvent();
-        event.setBookingId(bookingId);
-        event.setUserEmail(userEmail);
-        event.setAmount((double) amount / 100);
-        event.setStatus("PENDING");
-        event.setPaymentLink(paymentUrl);
-        event.setTransactionId(paymentLink.getId());
-
-        eventProducer.sendEvent(KafkaTopics.BOOKING_CREATED, event);
+//        eventProducer.sendEvent(KafkaTopics.PAYMENT_REQUEST, event);
         log.info("Payment event sent for booking: {}", bookingId);
 
         return paymentUrl;

@@ -1,4 +1,4 @@
-package com.booking_service.feignclient;
+package com.booking_service.feignclient.dto;
 
 import com.commonlibrary.common_library.common.enums.FacilityType;
 import lombok.Data;
