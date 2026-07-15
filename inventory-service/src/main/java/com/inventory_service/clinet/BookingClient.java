@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.UUID;
 
-@FeignClient(name = "booking-service",url = "http://localhost:8087/api/booking")
+@FeignClient(name = "booking-service")
 public interface BookingClient {
 
-    @PutMapping("/reserve/{roomId}")
+    @PutMapping("/api/booking/reserve/{roomId}")
     public String reserveRoomByroomId(@PathVariable("roomId") UUID roomId);
 }

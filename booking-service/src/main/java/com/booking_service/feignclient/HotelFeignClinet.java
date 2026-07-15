@@ -9,21 +9,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "hotel-service",url = "http://localhost:8086/api/hotel")
+@FeignClient(name = "hotel-service")
 public interface HotelFeignClinet {
 
-    @PostMapping("/search")
+    @PostMapping("/api/hotel/search")
     public List<FeignSearchResponseDto> getAllHotelsByFilters(
             @RequestParam(defaultValue = "0")int pageNumber,
             @RequestParam(defaultValue = "5")int pageSize
             ,@RequestBody FeignSearchHotelRequestDto filers);
 
 
-    @GetMapping("/{hotelId}")
+    @GetMapping("/api/hotel/{hotelId}")
     public  FeignHotelResponseDto getByHotelId(@PathVariable("hotelId") UUID hotelId);
 
 
-    @GetMapping("/getRoomsByHotelId/{hotelId}")
+    @GetMapping("/api/hotel/getRoomsByHotelId/{hotelId}")
     public List<FeignRoomResponseDto>getRoomsByHotelId (@PathVariable("hotelId")UUID hotelId);
 
     @GetMapping("/getRoomsByRoomId/{roomId}")
