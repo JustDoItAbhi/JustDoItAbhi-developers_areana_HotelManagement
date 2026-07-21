@@ -1,3 +1,4 @@
 com.commonlibrary.common_library.common.mail.MailAutoConfiguration
 com.commonlibrary.common_library.common.ratelimit.RateLimiterAutoConfiguration
 com.commonlibrary.common_library.common.kafka.KafkaAutoConfiguration
+com.commonlibrary.common_library.common.redis.RedisConfig

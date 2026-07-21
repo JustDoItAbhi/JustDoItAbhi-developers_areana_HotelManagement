@@ -12,7 +12,9 @@ public class UserInventry extends BaseModel {
     private String userEmail;
     private String hotelName;
     private UUID roomId;
-    private long amount;
+    private double amount;
     private int availableQuantity;
     private int reservedQuantity;
+    private UUID bookingId;
+    private String reason;
 }

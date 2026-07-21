@@ -14,24 +14,24 @@ import java.util.UUID;
 @FeignClient(name = "HOTEL-SERVICE")
 public interface HotelFeignClinet {
 
-    @PostMapping("/api/hotel/search")
+    @PostMapping("/api/hotels/search")
     public List<FeignSearchResponseDto> getAllHotelsByFilters(
             @RequestParam(defaultValue = "0")int pageNumber,
             @RequestParam(defaultValue = "5")int pageSize
             ,@RequestBody FeignSearchHotelRequestDto filers);
 
 
-    @GetMapping("/api/hotel/{hotelId}")
+    @GetMapping("/api/hotels/{hotelId}")
     public FeignHotelResponseDto getByHotelId(@PathVariable("hotelId") UUID hotelId);
 
 
-    @GetMapping("/api/hotel/getRoomsByHotelId/{hotelId}")
+    @GetMapping("/api/hotels/getRoomsByHotelId/{hotelId}")
     public List<FeignRoomResponseDto>getRoomsByHotelId (@PathVariable("hotelId")UUID hotelId);
 
-    @GetMapping("/api/hotel/getRoomsByRoomId/{roomId}")
+    @GetMapping("/api/hotels/getRoomsByRoomId/{roomId}")
     public FeignRoomResponseDto selectRoom(@PathVariable("roomId")UUID roomId);
 
-    @PutMapping("/api/hotel/reserveRoom/{roomId}")
+    @PutMapping("/api/hotels/reserveRoom/{roomId}")
     public RoomReserveDto resereveRoom(@PathVariable("roomId")UUID roomId);
 
 }

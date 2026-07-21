@@ -1,6 +1,7 @@
 package com.locationservice.locationservice.locations.service.cityservice;
 
 
+import com.commonlibrary.common_library.common.redis.RedisService;
 import com.locationservice.locationservice.locations.dto.request.CityDetailRequestDto;
 import com.locationservice.locationservice.locations.dto.request.CityRequestDto;
 import com.locationservice.locationservice.locations.dto.response.CityNameResponseDto;
@@ -14,16 +15,19 @@ import com.locationservice.locationservice.locations.repository.CountryRepositor
 import com.locationservice.locationservice.locations.repository.StateRepository;
 import jakarta.annotation.PostConstruct;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class CityServiceImpl implements CityService{
     Map<String, UUID> cityMap=new ConcurrentHashMap<>();
     Map<String, List<CityResponseDto>>stateMap=new ConcurrentHashMap<>();
-
+    @Autowired
+    private RedisService redisService;
 
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
@@ -40,6 +44,11 @@ public class CityServiceImpl implements CityService{
     public void initialize() {
        List<City>cityList= cityRepository.findAll();
        for(City city:cityList){
+//           String cityKey="cityId:"+city.getId();
+//           Object cityCache=redisService.get(cityKey);
+//           if(cityCache==null){
+//               redisService.set(cityKey,city,1, TimeUnit.HOURS);
+//           }
            cityMap.put(city.getCityName(),city.getId());
        }
 
@@ -55,13 +64,13 @@ public class CityServiceImpl implements CityService{
             cityId = cityMap.get(cityKey);
             if (cityId != null) {
                 City city = cityRepository.getReferenceById(cityId);
+
                 return mapper.map(city, CityNameResponseDto.class);
             }
 
 
-            States state =
-                    stateRepository.findByCountryIdAndStateName(dto.getCountryId(), dto.getStateName())
-                            .orElseThrow(() -> new RuntimeException("State not found"));
+            States state = stateRepository.findByCountryIdAndStateName(dto.getCountryId(), dto.getStateName()).orElseThrow(
+                    () -> new RuntimeException("State not found".toUpperCase()));
 
             City city = new City();
             city.setCityName(cityDetailRequestDto.getCityName().toUpperCase());
@@ -77,7 +86,10 @@ public class CityServiceImpl implements CityService{
 
             stateMap.put(dto.getStateName(),responseDtoList);
             cityMap.put(cityKey, city.getId());
+
             cityNameResponseDto=mapper.map(city, CityNameResponseDto.class);
+
+            redisService.set("city:"+cityId,cityNameResponseDto ,1,TimeUnit.HOURS);
 
         }
         return cityNameResponseDto;
@@ -87,11 +99,17 @@ public class CityServiceImpl implements CityService{
 
     @Override
     public List<CityNameResponseDto> getAll() {
+        String key="allcities";
+        Object cache=redisService.get(key);
+        if(cache!=null){
+            return (List<CityNameResponseDto>) cache;
+        }
             List<City>cityList=cityRepository.findAll();
             List<CityNameResponseDto>responseDtos=new ArrayList<>();
             for(City city:cityList){
                 responseDtos.add(mapper.map(city,CityNameResponseDto.class));
             }
+            redisService.set(key,responseDtos,30,TimeUnit.HOURS);
             return responseDtos;
         }
 

@@ -2,7 +2,7 @@ package com.booking_service.feignclient.dto;
 
 import lombok.Data;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 @Data
@@ -13,8 +13,8 @@ public class FeignHotelResponseDto {
     private String description;
     private int numberOfRooms;
     private boolean breakFast;
-    private Instant checkInTime;
-    private Instant CheckoutTime;
+    private LocalDateTime checkInTime;
+    private LocalDateTime CheckoutTime;
     private List<FeignAddressResponseDto> addressDtoList;
     private FeignRatingResponseDto rating;
     private List<FeignRoomResponseDto>roomList;

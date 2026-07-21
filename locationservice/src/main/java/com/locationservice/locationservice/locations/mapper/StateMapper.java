@@ -25,7 +25,7 @@ public class StateMapper {
         dto.setStateName(state.getStateName());
         List<CityResponseDto>cityResponseDtos=new ArrayList<>();
         for(City city:state.getCityList()){
-            System.out.println("CITY DETAILS "+city.getCityName());
+
             cityResponseDtos.add(CityMapper.fromCityByState(city));
         }
         dto.setCityResponseDtoList(cityResponseDtos);

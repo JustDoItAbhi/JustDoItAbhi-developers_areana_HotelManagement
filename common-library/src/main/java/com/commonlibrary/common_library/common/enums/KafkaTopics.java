@@ -14,4 +14,5 @@ public class KafkaTopics {
     public static final String INVENTORY_RELEASED = "inventory-released";
     public static final String NOTIFICATION_EMAIL = "notification-email";
     public static final String DEAD_LETTER = "dead-letter";
+    public static final String USER_LOGIN ="user-login";
 }

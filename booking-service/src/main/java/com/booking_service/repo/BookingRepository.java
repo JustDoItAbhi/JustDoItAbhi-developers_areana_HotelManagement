@@ -9,4 +9,5 @@ import java.util.UUID;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, UUID> {
     Optional<Booking> findByRoomId(UUID roomId);
+    Optional<Booking>findById(UUID boookingId);
 }

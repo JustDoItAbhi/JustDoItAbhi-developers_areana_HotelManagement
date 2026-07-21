@@ -9,45 +9,44 @@ import java.util.function.Predicate;
 
 @Component
 public class RouteValidator {
-
-    // Public endpoints
     public static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/api/user/register",
-            "/api/user/login",
+            "/api/users/register",
+            "/api/users/login",
             "/api/auth",
             "/actuator/health",
-            "/fallback"
+            "/fallback",
+            "/api/bookings/bookingResult/"
     );
 
     // Role-based access control mappings
     public static final Map<String, List<String>> ROLE_ENDPOINT_MAPPING = Map.of(
             // Admin-only endpoints
             "ROLE_ADMIN", List.of(
-                    "/api/user/getallusers",
+                    "/api/users/getallusers",
                     "/api/admin/**",
-                    "/api/user/**",
-                    "/api/hotel/**",
-                    "/api/booking/**",
-                    "/api/pay/create"
+                    "/api/users/**",
+                    "/api/hotels/**",
+                    "/api/bookings/**",
+                    "/api/payments/create"
 
             ),
 
             // Hotel Manager endpoints
             "ROLE_MANAGER", List.of(
-                    "/api/hotel/**",
-                    "/api/hotel/getallhotels",
-                    "/api/hotel/**/update",
-                    "/api/hotel/**/delete",
-                    "/api/booking/**",
-                    "/api/pay/create"
+                    "/api/hotels/**",
+                    "/api/hotels/getallhotels",
+                    "/api/hotels/**/update",
+                    "/api/hotels/**/delete",
+                    "/api/bookings/**",
+                    "/api/payments/create"
             ),
 
             // User endpoints (accessible by all authenticated users)
             "ROLE_USER", List.of(
-                    "/api/user/{email}",
-                    "/api/booking/**",
-                    "/api/hotel/getallhotels",
-                    "/api/pay/create",
+                    "/api/users/{email}",
+                    "/api/bookings/**",
+                    "/api/hotels/getallhotels",
+                    "/api/payments/create",
                     "/api/inventory/**",
                     "/api/location/**",
                     "/api/notification/**"

@@ -1,14 +1,15 @@
 package com.inventory_service.service;
 
 
-import com.commonlibrary.common_library.common.event.BookingCancelledEvent;
-import com.commonlibrary.common_library.common.event.BookingCreatedEvent;
-import com.commonlibrary.common_library.common.event.InventoryReleasedEvent;
-import com.commonlibrary.common_library.common.event.InventoryReservedEvent;
+import com.commonlibrary.common_library.common.enums.KafkaTopics;
+import com.commonlibrary.common_library.common.event.*;
+import com.commonlibrary.common_library.common.kafka.EventProducer;
 import com.inventory_service.model.UserInventry;
 import com.inventory_service.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,33 +20,36 @@ import org.springframework.transaction.annotation.Transactional;
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Transactional
-    public void reserveInventory(BookingCreatedEvent event) {
+    @Autowired
+    private EventProducer eventProducer;
+
+    @KafkaListener(topics = KafkaTopics.PAYMENT_SUCCESS)
+    public void inventryreserve(PaymentCompletedEvent event){
         try {
             UserInventry inventory = inventoryRepository.findByRoomId(event.getRoomId());
-            if(inventory==null){
-                throw new RuntimeException("Inventory not found for room: " + event.getRoomId());
-            }
 
             if (inventory.getAvailableQuantity() < 1) {
                 throw new RuntimeException("Not enough inventory for room: " + event.getRoomId());
             }
+            inventory.setRoomId(event.getRoomId());
+            inventory.setAmount(event.getAmount());
+            inventory.setUserEmail(event.getUserEmail());
+            inventory.setHotelName(event.getHotelName());
             inventory.setAvailableQuantity(inventory.getAvailableQuantity() - 1);
             inventory.setReservedQuantity(inventory.getReservedQuantity() + 1);
             inventoryRepository.save(inventory);
 
-            // Publish inventory reserved event
             InventoryReservedEvent reservedEvent = InventoryReservedEvent.builder()
                     .bookingId(event.getBookingId())
                     .roomId(event.getRoomId())
+                    .hotelName(inventory.getHotelName())
                     .userEmail(event.getUserEmail())
                     .quantity(1)
-                    .amount(event.getTotalAmount())
+                    .amount(event.getAmount())
                     .build();
-
-            kafkaTemplate.send("inventory-reserved", event.getBookingId().toString(), reservedEvent);
+            System.out.println("ADDED INVENTIRY SERVICES INVENTIRY RESERVED EVENT AND SEND TO KAFKA ");
+            eventProducer.sendEvent(KafkaTopics.INVENTORY_RESERVED,reservedEvent);
             log.info("Inventory reserved for booking: {}", event.getBookingId());
 
         } catch (Exception e) {
@@ -54,19 +58,21 @@ public class InventoryService {
         }
     }
 
-    @Transactional
-    public void releaseInventory(BookingCancelledEvent event) {
+
+    @KafkaListener(topics = KafkaTopics.PAYMENT_FAILED)
+    public void releaseInventory(PaymentCompletedEvent event) {
         try {
             UserInventry inventory = inventoryRepository.findByRoomId(event.getRoomId());
-            if(inventory==null){
-                throw new RuntimeException("Inventory not found for room: " + event.getRoomId());
-            }
-
+            inventory.setHotelName(event.getHotelName());
+            inventory.setAmount(event.getAmount());
+            inventory.setRoomId(event.getRoomId());
+            inventory.setUserEmail(event.getUserEmail());
+            inventory.setBookingId(event.getBookingId());
+            inventory.setReason(event.getFailureReason());
             inventory.setAvailableQuantity(inventory.getAvailableQuantity() + 1);
             inventory.setReservedQuantity(inventory.getReservedQuantity() - 1);
             inventoryRepository.save(inventory);
 
-            // Publish inventory released event
             InventoryReleasedEvent releasedEvent = InventoryReleasedEvent.builder()
                     .bookingId(event.getBookingId())
                     .roomId(event.getRoomId())
@@ -74,8 +80,8 @@ public class InventoryService {
                     .quantity(1)
                     .reason("Booking cancelled")
                     .build();
-
-            kafkaTemplate.send("inventory-released", event.getBookingId().toString(), releasedEvent);
+            System.out.println("INVENTRY FAILED EVENT PASSED ");
+            eventProducer.sendEvent(KafkaTopics.INVENTORY_RELEASED,releasedEvent);
             log.info("Inventory released for booking: {}", event.getBookingId());
 
         } catch (Exception e) {

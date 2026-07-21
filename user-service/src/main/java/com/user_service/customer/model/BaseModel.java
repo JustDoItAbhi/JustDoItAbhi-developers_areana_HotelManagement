@@ -9,7 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 @Getter
 @Setter
@@ -19,8 +19,8 @@ public abstract class BaseModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @CreationTimestamp
-    private Instant createdAt;
+    private LocalDateTime createdAt;
     @UpdateTimestamp
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
     private boolean isActive= true;
 }

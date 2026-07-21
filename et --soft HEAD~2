@@ -1,0 +1,47 @@
+[33mcommit 22453eaa5839c06220388424c05a9f25c675517a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Admin <erarvinder2012@gmail.com>
+Date:   Wed Jul 22 00:20:34 2026 +0300
+
+    docker left and exception handling
+
+[33mcommit 44e85275f878a903170775e271d6ff12ec9ddd67[m
+Author: Admin <erarvinder2012@gmail.com>
+Date:   Wed Jul 22 00:17:26 2026 +0300
+
+    project complete
+
+[33mcommit 9e968f930b9eca54cfc4d0846492a4208a380de5[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: Admin <erarvinder2012@gmail.com>
+Date:   Wed Jul 15 08:14:52 2026 +0300
+
+    starting docker
+
+[33mcommit 700638d896fb7c477cd22a9790daa875838e7023[m
+Author: Admin <erarvinder2012@gmail.com>
+Date:   Wed Jul 15 05:58:12 2026 +0300
+
+    port correction
+
+[33mcommit 0e1ab1c0cf24bbd0ffbedb399aaf41e68e33f349[m
+Author: Admin <erarvinder2012@gmail.com>
+Date:   Tue Jul 14 16:14:20 2026 +0300
+
+    kafka integrated
+
+[33mcommit a8bc8c485ea57d11fec45320bf4e258797e28a7e[m
+Author: Admin <erarvinder2012@gmail.com>
+Date:   Tue Jul 14 00:40:04 2026 +0300
+
+    left kafka
+
+[33mcommit 17be8f9410a143f2f91d5418ec711b9978abd687[m
+Author: Admin <erarvinder2012@gmail.com>
+Date:   Sat Jul 11 17:02:00 2026 +0300
+
+    still solving pattern confusion
+
+[33mcommit 18ff88b1b4f7e1aa2d05142dbb694284226faa40[m
+Author: Admin <erarvinder2012@gmail.com>
+Date:   Sat Jun 27 18:34:18 2026 +0300
+
+    microservice improved

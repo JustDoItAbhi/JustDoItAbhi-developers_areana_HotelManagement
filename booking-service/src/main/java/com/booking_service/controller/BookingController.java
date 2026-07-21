@@ -1,5 +1,6 @@
 package com.booking_service.controller;
 
+import com.booking_service.dto.BookingDetail;
 import com.booking_service.dto.BookingResponseDto;
 import com.booking_service.dto.request.BookingRequestDto;
 import com.booking_service.feignclient.dto.FeignHotelResponseDto;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/booking")
+@RequestMapping("/api/bookings")
 public class BookingController {
     @Autowired
     private BookingService bookingService;
@@ -48,16 +49,22 @@ public class BookingController {
     public ResponseEntity<FeignRoomResponseDto>selectRoomByroomId(@PathVariable("roomId") UUID roomId) {
         return ResponseEntity.ok(bookingService.selectRoomByID(roomId));
     }
-    @PutMapping("/reserve/{userEmail}/{roomId}")
-    @Tracking
-    @RateLimit(value = 50,duration = 60000)
-    public ResponseEntity<String>reserveRoomByroomId(@PathVariable("userEmail") String userEmail,@PathVariable("roomId") UUID roomId) {
-        return ResponseEntity.ok(bookingService.reserveRoom(userEmail,roomId));
-    }
+//    @PutMapping("/reserve/{userEmail}/{roomId}")
+//    @Tracking
+//    @RateLimit(value = 50,duration = 60000)
+//    public ResponseEntity<String>reserveRoomByroomId(@PathVariable("userEmail") String userEmail,@PathVariable("roomId") UUID roomId) {
+//        return ResponseEntity.ok(bookingService.reserveRoom(userEmail,roomId));
+//    }
     @PostMapping("/book")
     @Tracking
     @RateLimit(value = 50,duration = 60000)
     public ResponseEntity<BookingResponseDto>booking(@RequestBody BookingRequestDto dto) {
         return ResponseEntity.ok(bookingService.createBooking(dto));
+    }
+    @GetMapping("/bookingResult/{bookingId}")
+    @Tracking
+    @RateLimit(value = 50,duration = 60000)
+    public ResponseEntity<BookingDetail>getFinalbooking(@PathVariable("bookingId") UUID bookingId) {
+        return ResponseEntity.ok(bookingService.bookingResult(bookingId));
     }
 }

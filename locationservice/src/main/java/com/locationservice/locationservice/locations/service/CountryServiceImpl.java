@@ -1,6 +1,9 @@
 package com.locationservice.locationservice.locations.service;
 
 
+import com.commonlibrary.common_library.common.redis.RedisService;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.locationservice.locationservice.locations.dto.request.CountryRequestDto;
 import com.locationservice.locationservice.locations.dto.response.CityResponseDto;
 import com.locationservice.locationservice.locations.dto.response.CountryOnlyNameResponseDto;
@@ -14,11 +17,13 @@ import com.locationservice.locationservice.locations.repository.CountryRepositor
 import com.locationservice.locationservice.locations.repository.StateRepository;
 import jakarta.annotation.PostConstruct;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -26,7 +31,10 @@ public class CountryServiceImpl implements CountryService {
     Map<String,UUID>countryMap=new ConcurrentHashMap<>();
     Map<String, UUID>cityMap=new ConcurrentHashMap<>();
     Map<String, UUID>stateMap=new ConcurrentHashMap<>();
-
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
@@ -41,8 +49,10 @@ public class CountryServiceImpl implements CountryService {
     }
     @PostConstruct
     public void initialize() {
-        countryRepository.findAll().forEach(country ->
-                countryMap.put(country.getCountryName(), country.getId()));
+      List<Country> country=  countryRepository.findAll();
+      for(Country country1:country){
+          countryMap.put(country1.getCountryName(),country1.getId());
+      }
         System.out.println("COUNTRY CACHES ADDED ");
     }
 
@@ -52,6 +62,12 @@ public class CountryServiceImpl implements CountryService {
 
         if (existingId != null) {
             Country oldCountry = countryRepository.getReferenceById(existingId);
+            String key="country:"+oldCountry.getId();
+            Object cache=redisService.get(key);
+            if(cache!=null){
+                return objectMapper.convertValue(cache,CountryOnlyNameResponseDto.class);
+            }
+
             return mapper.map(oldCountry, CountryOnlyNameResponseDto.class);
         }
 
@@ -61,14 +77,18 @@ public class CountryServiceImpl implements CountryService {
             country = countryRepository.save(country);
 
             countryMap.put(country.getCountryName(), country.getId());
-
-            return mapper.map(country, CountryOnlyNameResponseDto.class);
+            CountryOnlyNameResponseDto responseDto=mapper.map(country, CountryOnlyNameResponseDto.class);
+            redisService.set("country:"+country.getId(),responseDto);
+            return responseDto;
         }
 
 
     @Override
     public boolean deleteCountry(UUID countryId) {
-        return false;
+        String key="country:"+countryId;
+        countryRepository.deleteById(countryId);
+        redisService.delete(key);
+        return true;
     }
 
     @Override
@@ -78,6 +98,13 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public List<CountryResponseDto> getAllCountriesAndStatesAndCities(String countryName) {
+     String key ="allcountrysAndCities";
+     Object cache=redisService.get(key);
+     if(cache!=null){
+         JavaType type = objectMapper.getTypeFactory()
+                 .constructCollectionType(List.class, CountryResponseDto.class);
+         return objectMapper.convertValue(cache, type);
+     }
       if(!cityMap.containsKey(countryName)){
           System.out.println("COUNTRY NAME IS INVALID IN CACHE MEMORY "+countryName);
       }
@@ -96,12 +123,25 @@ public class CountryServiceImpl implements CountryService {
             StateResponseDto stateResponseDto=new StateResponseDto();
             stateResponseDto.setStateName(newState.getStateName());
             stateResponseDto.setStateId(newState.getId());
+            String stateKey="state:"+newState.getId();
+            Object stateCache=redisService.get(stateKey);
+            if(stateCache==null){
+                redisService.set(stateKey,stateResponseDto,1, TimeUnit.HOURS);
+            }
             for(City city:newState.getCityList()){
                 CityResponseDto cityResponseDto=new CityResponseDto();
                 cityResponseDto.setCityid(city.getId());
                 cityResponseDto.setCityName(city.getCityName());
                 cityResponseDto.setCityImage(city.getCityImage());
                 cityResponseDtoList.add(cityResponseDto);
+                String cityKey="city:"+city.getId();
+                Object cityCache=redisService.get(cityKey);
+                if(cityCache==null){
+                    redisService.set(cityKey,cityResponseDto,1,TimeUnit.HOURS);
+                }
+            }
+            if(stateCache!=null){
+
             }
             stateResponseDto.setCityResponseDtoList(cityResponseDtoList);
             stateResponseDtos.add(stateResponseDto);
@@ -126,11 +166,17 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public CountryResponseDto getByCountryName(String name) {
-
+        String key="countryname:"+name;
+        Object cache=redisService.get(key);
+        if(cache!=null){
+            return objectMapper.convertValue(cache,CountryResponseDto.class);
+        }
         Optional<Country>countryOptional=countryRepository.findByCountryName(name);
         if(countryOptional.isEmpty()){
             throw new RuntimeException("country with name not exists "+name);
         }
-        return mapper.map(countryOptional.get(),CountryResponseDto.class);
+        CountryResponseDto dto=mapper.map(countryOptional.get(),CountryResponseDto.class);
+        redisService.set(key,dto,1,TimeUnit.HOURS);
+        return dto;
     }
 }

@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -18,5 +18,5 @@ public class UserRegisteredEvent {
     private String email;
     private String fullName;
     @Builder.Default
-    private Instant registeredAt = Instant.now();
+    private LocalDateTime registeredAt = LocalDateTime.now();
 }

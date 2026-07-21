@@ -11,6 +11,6 @@ import java.util.UUID;
 
 @FeignClient(name = "PAYMENT-SERVICE")
 public interface PaymentFeignClient {
-    @PostMapping("/api/pay/create")
+    @PostMapping("/api/payments/create")
     String pay(@RequestBody PaymentRequestDto request);
 }

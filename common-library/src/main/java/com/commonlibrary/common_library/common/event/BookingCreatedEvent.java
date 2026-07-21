@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -19,12 +19,12 @@ public class BookingCreatedEvent {
     private UUID hotelId;
     private UUID roomId;
     private RoomType roomType;
-    private Instant checkInDate;
-    private Instant checkOutDate;
+    private LocalDateTime checkInDate;
+    private LocalDateTime checkOutDate;
     private double totalAmount;
     private String paymentLink;
     @Builder.Default
-    private Instant createdAt = Instant.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
 
 }

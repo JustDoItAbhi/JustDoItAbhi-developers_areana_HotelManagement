@@ -1,5 +1,6 @@
 package com.locationservice.locationservice.locations.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -8,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @MappedSuperclass
@@ -19,5 +20,6 @@ public abstract class BaseModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @CreationTimestamp
-    private Instant createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDateTime createdAt;
 }

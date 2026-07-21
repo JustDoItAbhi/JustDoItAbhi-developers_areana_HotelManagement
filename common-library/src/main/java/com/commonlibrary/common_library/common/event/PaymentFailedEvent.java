@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -14,9 +14,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PaymentFailedEvent {
     private UUID bookingId;
-    private UUID userId;
+    private String userEmail;
+    private UUID roomId;
     private double amount;
     private String errorMessage;
     @Builder.Default
-    private Instant failedAt = Instant.now();
+    private LocalDateTime failedAt = LocalDateTime.now();
 }

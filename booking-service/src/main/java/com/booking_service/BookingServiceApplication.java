@@ -10,11 +10,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableFeignClients
 @EnableDiscoveryClient
 @EnableKafka
-@org.springframework.scheduling.annotation.EnableScheduling
 public class BookingServiceApplication {
-
 	public static void main(String[] args) {
-		SpringApplication.run(BookingServiceApplication.class, args);
-	}
-
+        SpringApplication.run(BookingServiceApplication.class, args);
+    }
 }

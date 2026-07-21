@@ -1,114 +1,70 @@
 package com.notification_service.service;
 
-import com.commonlibrary.common_library.common.event.BookingCreatedEvent;
-import com.commonlibrary.common_library.common.event.NotificationEvent;
-import com.commonlibrary.common_library.common.event.PaymentCompletedEvent;
-import com.commonlibrary.common_library.common.event.UserRegisteredEvent;
+import com.commonlibrary.common_library.common.enums.KafkaTopics;
+import com.commonlibrary.common_library.common.event.*;
 
-import com.notification_service.email.SendEmailNotification;
-import lombok.RequiredArgsConstructor;
+import com.commonlibrary.common_library.common.kafka.EventProducer;
+import com.commonlibrary.common_library.common.mail.JavaMailCreator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 public class NotificationService {
-@Autowired
-    private  KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Value("${spring.mail.username}")
+    private String adminEmail;
+
     @Autowired
-    private SendEmailNotification emailNotifiation;
+    private EventProducer eventProducer;
+    @Autowired
+    private JavaMailCreator javaMailCreator;
+@KafkaListener(topics = KafkaTopics.BOOKING_CREATED)
+   public void bookingCreated (BookingCreatedEvent event){
+    System.out.println("REQUEST REACHED TO NOTIFICATION SERVICE ");
+    javaMailCreator.send(event.getUserEmail(),"BOOKING CREATED PLEASE PAY ",event.getPaymentLink());
+    log.info("INVENTORY BOOKING LINK HAS BEEN PUBLISH {}  ",event.getUserEmail());
 
-    @Async
-    public void sendBookingConfirmation(BookingCreatedEvent event) {
-        String message = String.format(
-                "Dear Customer,\n\n" +
-                        "Your booking has been confirmed!\n" +
-                        "Booking ID: %s\n" +
-                        "Hotel ID: %s\n" +
-                        "Room ID: %s\n" +
-                        "Check-in: %s\n" +
-                        "Check-out: %s\n" +
-                        "Total Amount: $%.2f\n\n" +
-                        "Thank you for choosing our service!",
-                event.getBookingId(),
-                event.getHotelId(),
-                event.getRoomId(),
-                event.getCheckInDate(),
-                event.getCheckOutDate(),
-                event.getTotalAmount()
-        );
+   }
 
-        // Send email notification
-        NotificationEvent emailEvent = NotificationEvent.builder()
-                .recipient(event.getUserEmail()) // Get from user service
-                .subject("Booking Confirmation - " + event.getBookingId())
-                .message(message)
-                .email(event.getUserEmail())
-                .build();
-
-        kafkaTemplate.send("notification-email", emailEvent);
-        String subject ="ROOM RESERVED PLEASE PAY ";
-        emailNotifiation.sendEmail(event.getUserEmail(),subject,message);
-        log.info("Booking confirmation notification queued for: {}", event.getBookingId());
+   @KafkaListener(topics = KafkaTopics.PAYMENT_SUCCESS)
+    public void paymentStatus(PaymentCompletedEvent event){
+       System.out.println("PAYMENT STATUS UPDATED ");
+    String message ="PAYMENT CONGRATULATIONS "+event.getUserName()+" FOR USING OUT SERVICE AS YOUR ROOM TYPE  "+event.getRoomType()+" BOOKED BY "+event.getUserEmail();
+    javaMailCreator.send(event.getUserEmail(),"PAYMENT CONFIRMED "+event.getIsSuccessful(),message);
+    log.info("EMAIL SEND TO USER WITH PAYMENT CONFIMED  :{}",event.getUserEmail());
+}
+    @KafkaListener(topics = KafkaTopics.PAYMENT_FAILED)
+    public void paymentFail(PaymentCompletedEvent event){
+        System.out.println("PAYMENT FAIL STATUS UPDATED ");
+        String message ="PAYMENT DETAILS "+event.getIsSuccessful()+" "+event.getRoomType()+" "+event.getUserEmail();
+        javaMailCreator.send(event.getUserEmail(),"PAYMENT STATUS "+event.getIsSuccessful(),message);
+        log.info("EMAIL SEND TO USER WITH :{}",event.getUserEmail());
     }
 
-    @Async
-    public void sendPaymentSuccess(PaymentCompletedEvent event) {
-        String message = String.format(
-                "Dear Customer,\n\n" +
-                        "Your payment of $%.2f has been successfully processed.\n" +
-                        "Payment ID: %s\n" +
-                        "Transaction ID: %s\n\n" +
-                        "Thank you for your payment!",
-                event.getAmount(),
-                event.getPaymentId(),
-                event.getTransactionId()
-        );
+@KafkaListener(topics = KafkaTopics.USER_REGISTERED)
+    public void userRegistered(UserRegisteredEvent event){
+    System.out.println("USER REGISTERED EVENT ");
+    String messge ="PLEASE LOGIN "+" http://localhost:9000/api/users/login";
+    javaMailCreator.send(event.getEmail(),"SIGN UP SUCCESSFULL ",messge);
+    System.out.println("EMAIL SENT BY USER SERVICE ");
+    log.info("User registered: {}", event.getEmail());
+}
 
-        NotificationEvent emailEvent = NotificationEvent.builder()
-                .recipient("customer@example.com")
-                .subject("Payment Successful - " + event.getBookingId())
-                .message(message)
-                .email("EMAIL")
-                .build();
+@KafkaListener(topics = KafkaTopics.USER_LOGIN)
+    public void loginNotification(UserLoginEvent event){
+    String messge ="welcome back "+event.getUserName();
+    javaMailCreator.send(event.getUserEmail(),"LOGIN SUCCESSFULL ",messge);
+    System.out.println("EMAIL SENT BY NOTIFICATION SERVICE ");
+}
 
-        kafkaTemplate.send("notification-email", emailEvent);
-        log.info("Payment success notification queued for: {}", event.getBookingId());
-    }
-
-    @Async
-    public void sendWelcomeEmail(UserRegisteredEvent event) {
-        String message = String.format(
-                "Welcome %s!\n\n" +
-                        "Thank you for registering with us.\n" +
-                        "Your username is: %s\n" +
-                        "Your email is: %s\n\n" +
-                        "We're excited to have you on board!",
-                event.getFullName(),
-                event.getUsername(),
-                event.getEmail()
-
-        );
-
-        NotificationEvent emailEvent = NotificationEvent.builder()
-                .recipient(event.getEmail())
-                .subject("Welcome to Our Hotel Booking Platform")
-                .message(message)
-                .email("EMAIL")
-                .build();
-
-        kafkaTemplate.send("notification-email", emailEvent);
-        log.info("Welcome email queued for: {}", event.getEmail());
-    }
-
-    @Async
-    public void sendEmail(NotificationEvent event) {
-        log.info("Sending email to: {}", event.getRecipient());
-        log.info("Subject: {}", event.getSubject());
-        log.info("Message: {}", event.getMessage());
-        // In production, integrate with actual email service (SendGrid, AWS SES, etc.)
+    @KafkaListener(topics = KafkaTopics.HOTEL_CREATED)
+    public void hotelCreated(HotelCreatedEvent event){
+        String messge ="CONGRATULATIONS FOR NEW HOTEL ENTRY  "+event.getHotelName();
+        javaMailCreator.send(adminEmail,"HOTEL ADDED SUCCESSFULL ",messge);
+        System.out.println("EMAIL SENT BY NOTIFICATION SERVICE FOR NEW HOTEL ");
     }
 }

@@ -1,17 +1,14 @@
 package com.payment_service.controller;
 
+import com.payment_service.dto.PaymentRequest;
 import com.payment_service.paymentgateway.PaymentService;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 @RestController
-@RequestMapping("/api/pay")
+@RequestMapping("/api/payments")
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentController {
@@ -30,4 +27,5 @@ public class PaymentController {
                 request.getEmail()
         );
     }
+
 }

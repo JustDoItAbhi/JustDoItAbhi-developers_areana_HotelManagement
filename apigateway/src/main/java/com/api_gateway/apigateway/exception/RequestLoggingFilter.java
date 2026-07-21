@@ -29,8 +29,8 @@ public class RequestLoggingFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicRoute(String path) {
-        return path.startsWith("/api/user/register") ||
-                path.startsWith("/api/user/login") ||
+        return path.startsWith("/api/users/register") ||
+                path.startsWith("/api/users/login") ||
                 path.startsWith("/api/auth/") ||
                 path.startsWith("/actuator/health") ||
                 path.startsWith("/fallback/");

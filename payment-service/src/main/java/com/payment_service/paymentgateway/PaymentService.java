@@ -3,6 +3,8 @@ package com.payment_service.paymentgateway;
 import com.commonlibrary.common_library.common.enums.KafkaTopics;
 import com.commonlibrary.common_library.common.event.BookingPaymentEvent;
 import com.commonlibrary.common_library.common.kafka.EventProducer;
+import com.payment_service.model.Payment;
+import com.payment_service.repository.PaymentRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentLink;
@@ -13,9 +15,11 @@ import com.stripe.param.PriceCreateParams;
 import com.stripe.param.ProductCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -28,7 +32,8 @@ public class PaymentService implements PaymentGateway {
 
     @Value("${spring.after.payment.url}")
     private String redirectUrl;
-
+@Autowired
+private PaymentRepository paymentRepository;
     private final EventProducer eventProducer;
 
     @Override
@@ -61,27 +66,30 @@ public class PaymentService implements PaymentGateway {
                                 .setType(PaymentLinkCreateParams.AfterCompletion.Type.REDIRECT)
                                 .setRedirect(
                                         PaymentLinkCreateParams.AfterCompletion.Redirect.builder()
-                                                .setUrl(redirectUrl + "?bookingId=" + bookingId)
+                                                .setUrl(redirectUrl + "bookingResult/" + bookingId)
                                                 .build()
                                 )
+
+                                .build()
+                )    .setPaymentIntentData(
+                        PaymentLinkCreateParams.PaymentIntentData.builder()
+                                .putMetadata("bookingId", bookingId.toString())
+                                .putMetadata("roomId", roomId.toString())
+                                .putMetadata("userEmail", userEmail)
                                 .build()
                 )
                 .build();
         PaymentLink paymentLink = PaymentLink.create(linkParams);
-
         String paymentUrl = paymentLink.getUrl();
         log.info("Payment link created: {}", paymentUrl);
-//        BookingPaymentEvent event = new BookingPaymentEvent();
-//        event.setBookingId(bookingId);
-//        event.setUserEmail(userEmail);
-//        event.setAmount((double) amount / 100);
-//        event.setStatus("PENDING");
-//        event.setPaymentLink(paymentUrl);
-//        event.setTransactionId(paymentLink.getId());
-
-//        eventProducer.sendEvent(KafkaTopics.PAYMENT_REQUEST, event);
         log.info("Payment event sent for booking: {}", bookingId);
-
+        Payment payment = new Payment();
+        payment.setBookingId(bookingId);
+        payment.setAmount((double) amount / 100);
+        payment.setStatus("PENDING");
+        payment.setUserEmail(userEmail);
+        paymentRepository.save(payment);
         return paymentUrl;
     }
 }
+

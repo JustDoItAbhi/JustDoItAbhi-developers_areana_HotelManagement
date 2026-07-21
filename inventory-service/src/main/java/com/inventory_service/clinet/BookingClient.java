@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @FeignClient(name = "booking-service")
 public interface BookingClient {
-
-    @PutMapping("/api/booking/reserve/{roomId}")
-    public String reserveRoomByroomId(@PathVariable("roomId") UUID roomId);
+//
+//    @PutMapping("/api/bookings/reserve/{roomId}")
+//    public String reserveRoomByroomId(@PathVariable("roomId") UUID roomId);
 }

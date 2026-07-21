@@ -8,15 +8,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "outbox_events")
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OutboxEvent extends BaseEntity {
+public class OutboxEvent  {
 
     @Column(nullable = false)
     private String aggregateId;
@@ -37,9 +36,9 @@ public class OutboxEvent extends BaseEntity {
     private String status = "PENDING"; // PENDING, PROCESSING, PROCESSED, FAILED
 
     @CreationTimestamp
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
-    private Instant processedAt;
+    private LocalDateTime processedAt;
 
     private Integer retryCount = 0;
 

@@ -2,11 +2,14 @@ package com.user_service.customer.dto.response;
 
 import com.commonlibrary.common_library.common.enums.UserRole;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Data
+
 public class UserResponseDto {
     private UUID id;
     private String name;
@@ -15,5 +18,5 @@ public class UserResponseDto {
     private String state;
     private String city;
     private String phoneNumber;
-    private UserRole role;
+    private String role;
 }

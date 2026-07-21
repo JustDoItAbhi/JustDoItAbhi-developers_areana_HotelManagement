@@ -1,4 +1,4 @@
-package com.payment_service.controller;
+package com.payment_service.dto;
 
 import lombok.Data;
 
@@ -10,6 +10,4 @@ public class PaymentRequest {
      private long amount;
      private UUID bookingId;
      private String email;
-
-
 }

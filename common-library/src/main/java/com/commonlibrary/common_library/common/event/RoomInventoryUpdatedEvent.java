@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -18,5 +18,5 @@ public class RoomInventoryUpdatedEvent {
     private RoomType roomType;
     private int availableRooms;
     @Builder.Default
-    private Instant updatedAt = Instant.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }

@@ -6,7 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -17,8 +18,12 @@ public class InventoryReservedEvent {
     private UUID bookingId;
     private UUID roomId;
     private String userEmail;
+    private LocalDateTime checkInTime;
+    private LocalDateTime checkOutTime;
     private int quantity;
     private double amount;
+    private String hotelName;
+    private String action;
     @Builder.Default
-    private Instant reservedAt = Instant.now();
+    private LocalDateTime reservedAt = LocalDateTime.now();
 }

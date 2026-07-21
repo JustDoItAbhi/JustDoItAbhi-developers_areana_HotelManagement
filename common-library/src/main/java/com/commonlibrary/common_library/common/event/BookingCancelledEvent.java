@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -18,5 +18,5 @@ public class BookingCancelledEvent {
     private UUID roomId;
     private double refundAmount;
     @Builder.Default
-    private Instant cancelledAt = Instant.now();
+    private LocalDateTime cancelledAt = LocalDateTime.now();
 }

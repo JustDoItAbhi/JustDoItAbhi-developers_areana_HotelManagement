@@ -1,7 +1,7 @@
 package com.booking_service.service;
 
+import com.booking_service.dto.BookingDetail;
 import com.booking_service.dto.BookingResponseDto;
-import com.booking_service.dto.RoomReserveDto;
 import com.booking_service.dto.UserDto;
 import com.booking_service.dto.request.BookingRequestDto;
 import com.booking_service.dto.request.PaymentRequestDto;
@@ -16,15 +16,19 @@ import com.booking_service.responsedto.FeignSearchResponseDto;
 import com.commonlibrary.common_library.common.enums.KafkaTopics;
 import com.commonlibrary.common_library.common.event.BookingCreatedEvent;
 import com.commonlibrary.common_library.common.kafka.EventProducer;
+import com.commonlibrary.common_library.common.redis.RedisService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -36,7 +40,11 @@ public class BookingServcieImpl implements BookingService{
     @Autowired private BookingRepository bookingRepository;
     @Autowired private KafkaTemplate<String, Object>kafkaTemplate;
    @Autowired private PaymentFeignClient paymentFeignClinet;
+   @Autowired private RedisService redisService;
+
+   @Autowired private ObjectMapper objectMapper;
     private final EventProducer eventProducer;
+
 
     public BookingServcieImpl(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
@@ -64,40 +72,8 @@ public class BookingServcieImpl implements BookingService{
     }
 
     @Override
-    public String reserveRoom(String userEmail,UUID roomId) {
-        UserDto userDto=userClient.getUser(userEmail);
-        if(userDto==null){
-            throw new RuntimeException("INVALID USER "+userEmail);
-        }
-        Optional<Booking>bookingOptional=bookingRepository.findByRoomId(roomId);
-        if(bookingOptional.isPresent()){
-            return "this is already reserved please choose another room"+roomId;
-        }
-        FeignRoomResponseDto dto=hotelFeignClinet.selectRoom(roomId);
-        Booking booking=new Booking();
-        booking.setUserEmail(userEmail);
-        booking.setRoomType(dto.getRoomType());
-        booking.setHotelId(dto.getHotelId());
-        booking.setRoomId(dto.getRoomId());
-        booking.setTotalAmount(780);
-        bookingRepository.save(booking);
-        BookingCreatedEvent event=new BookingCreatedEvent();
-        event.setTotalAmount(780);
-        event.setRoomId(roomId);
-        event.setUserEmail(userDto.getEmail());
-        event.setBookingId(booking.getId());
-        event.setRoomType(dto.getRoomType());
-        event.setHotelId(dto.getHotelId());
-        RoomReserveDto reserveDto=hotelFeignClinet.resereveRoom(roomId);
-        reserveDto.setBookingId(booking.getId());
-        reserveDto.setUserEmail(booking.getUserEmail());
-        String message ="ROOM RESERVED PLEASE PAY NOW ";
-        log.info("EMAIL SENT TO USER FOR PAYENT ");
-    return "";
-    }
-
-    @Override
     public BookingResponseDto createBooking(BookingRequestDto dto) {
+
         UserDto userDto = userClient.getUser(dto.getUserEmail());
         if (userDto == null) {
             throw new RuntimeException("INVALID USER");
@@ -120,11 +96,8 @@ public class BookingServcieImpl implements BookingService{
         PaymentRequestDto paymentRequestDto = new PaymentRequestDto();
         paymentRequestDto.setRoomId(booking.getRoomId());
         paymentRequestDto.setBookingId(booking.getId());
-
         paymentRequestDto.setAmount((long) (booking.getTotalAmount() * 100));
         paymentRequestDto.setEmail(booking.getUserEmail());
-
-        // Called Payment Service
         String paymentUrl = null;
         try {
             paymentUrl = paymentFeignClinet.pay(paymentRequestDto);
@@ -133,10 +106,7 @@ public class BookingServcieImpl implements BookingService{
             bookingRepository.save(booking);
         } catch (Exception e) {
             log.error("Failed to create payment: {}", e.getMessage());
-            // Continue without payment link
         }
-
-        // Create and send BookingCreatedEvent
         BookingCreatedEvent event = new BookingCreatedEvent();
         event.setBookingId(booking.getId());
         event.setUserEmail(booking.getUserEmail());
@@ -147,12 +117,62 @@ public class BookingServcieImpl implements BookingService{
         event.setCheckInDate(booking.getCheckInDate());
         event.setCheckOutDate(booking.getCheckOutDate());
         event.setPaymentLink(paymentUrl);
-        event.setCreatedAt(Instant.now());
+        event.setCreatedAt(LocalDateTime.now());
 
         eventProducer.sendEvent(KafkaTopics.BOOKING_CREATED, event);
-        log.info("Booking created event sent for booking: {}", booking.getId());
-
+        log.info("Booking created event sent for booking: {} BY TOPIC : {}".
+                toUpperCase(),KafkaTopics.BOOKING_CREATED,
+                event.getBookingId());
         return fromBookingEntity(booking);
+    }
+
+    private String splitNameFromEmail(String email){
+        String name=email.substring(0,email.indexOf("@"));
+        return name;
+    }
+
+    @Override
+    public BookingDetail bookingResult(UUID bookingId) {
+        String key="booking"+bookingId;
+        Object chache=redisService.get(key);
+        if(chache!=null){
+            return objectMapper.convertValue(chache,BookingDetail.class);
+        }
+        System.out.println("BOOKING RESULT METHOD CALLED");
+        Optional<Booking>bookingOptional=bookingRepository.findById(bookingId);
+        if(bookingOptional.isEmpty()){
+            throw new RuntimeException("INVALID BOOKING ID "+bookingId);
+        }
+        Booking booking=bookingOptional.get();
+        BookingDetail bookingDetail=fromBooking(booking);
+        redisService.set(key,bookingDetail,1,TimeUnit.HOURS);
+        return bookingDetail;
+    }
+
+
+    private BookingDetail fromBooking(Booking booking){
+        BookingDetail detail=new BookingDetail();
+        detail.setCurrency("USD");
+        FeignHotelResponseDto dto= getHotelBYid(booking.getHotelId());
+        detail.setHotelName(dto.getHotelName());
+        detail.setAmount(booking.getTotalAmount());
+        detail.setUserName(splitNameFromEmail(booking.getUserEmail()));
+        detail.setBookingId(booking.getId());
+        detail.setCheckInDate(booking.getCheckInDate());
+        detail.setCheckOutDate(booking.getCheckOutDate());
+        try {
+            FeignRoomResponseDto fDto = hotelFeignClinet.selectRoom(booking.getRoomId());
+            if(fDto==null){
+                throw new RuntimeException("INVLAID FEIGN CLIENT CALL TO HOTEL SERVICE ");
+            }
+            detail.setNumberOfGuests(fDto.getNumberOfPeopleAllowed());
+            detail.setRoomId(fDto.getRoomId());
+            detail.setRoomType(fDto.getRoomType());
+        }catch (Exception e){
+            throw new RuntimeException("FEIGNROOMRESPONSEDTO FAIL TO FETCH DATA ");
+        }
+        detail.setUserEmail(booking.getUserEmail());
+        return detail;
     }
 
     private BookingResponseDto fromBookingEntity(Booking booking) {

@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -19,5 +19,5 @@ public class InventoryReleasedEvent {
     private int quantity;
     private String reason;
     @Builder.Default
-    private Instant releasedAt = Instant.now();
+    private LocalDateTime releasedAt = LocalDateTime.now();
 }

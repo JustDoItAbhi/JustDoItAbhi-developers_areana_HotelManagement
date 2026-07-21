@@ -1,5 +1,6 @@
 package com.booking_service.service;
 
+import com.booking_service.dto.BookingDetail;
 import com.booking_service.dto.BookingResponseDto;
 import com.booking_service.dto.request.BookingRequestDto;
 import com.booking_service.feignclient.dto.FeignHotelResponseDto;
@@ -15,6 +16,7 @@ public interface BookingService {
     FeignHotelResponseDto getHotelBYid(UUID hotelId);
     List<FeignRoomResponseDto>getAllRoomsOfHotel(UUID hotelId);
     FeignRoomResponseDto selectRoomByID(UUID roomId);
-    String reserveRoom(String userEmail,UUID roomId);
+//    String reserveRoom(String userEmail,UUID roomId);
     BookingResponseDto createBooking(BookingRequestDto dto);
+    BookingDetail bookingResult(UUID bookingId);
 }
